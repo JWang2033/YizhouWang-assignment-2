@@ -39,13 +39,22 @@ def run_kmeans():
         data = np.array(request.json['data'])
         n_clusters = int(request.json['n_clusters'])
         init_method = request.json['init_method']
-        centroids = request.json.get('centroids')
+        centroids = request.json.get('centroids', None)  # Centroids are optional
 
+        print(f"Received data: {data}")
+        print(f"Number of clusters: {n_clusters}")
+        print(f"Initialization method: {init_method}")
+        if centroids:
+            print(f"Centroids: {centroids}")
+
+        # Call the method for running KMeans to convergence
         centers, labels = run_kmeans_convergence(data, n_clusters, init_method, centroids)
 
         return jsonify(centers=centers.tolist(), labels=labels.tolist())
     except Exception as e:
+        print(f"Error: {str(e)}")
         return jsonify({"error": str(e)}), 500
+
 
 # Route to reset KMeans
 @app.route('/reset_kmeans', methods=['POST'])
@@ -55,4 +64,4 @@ def reset():
 
 # Start the Flask application on port 5000 (to avoid conflicts with 3000)
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=3000)

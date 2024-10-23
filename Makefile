@@ -20,3 +20,22 @@ clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 
 .PHONY: install run clean
+
+# Define the port number
+PORT = 3000
+
+# Command to find and kill the process occupying the port
+killport:
+		@echo "Checking if port $(PORT) is in use..."
+		@PID=$$(lsof -ti tcp:$(PORT)); \
+		if [ -n "$$PID" ]; then \
+				echo "Killing process $$PID on port $(PORT)..."; \
+				kill -9 $$PID; \
+		else \
+				echo "No process found on port $(PORT)."; \
+		fi
+
+# Start the Flask application
+run: killport
+		@echo "Starting Flask on port $(PORT)..."
+		python app.py

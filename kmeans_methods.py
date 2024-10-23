@@ -45,20 +45,27 @@ def run_kmeans_step(data, n_clusters, init_method, current_iter):
 
 
 # Function to run KMeans to convergence
-def run_kmeans_convergence(data, n_clusters, init_method):
+def run_kmeans_convergence(data, n_clusters, init_method, centroids=None):
     print(f"Running KMeans to convergence with {n_clusters} clusters and {init_method} initialization.")
 
-    if init_method == 'random':
-        init = 'random'
-    elif init_method == 'kmeans++':
-        init = 'k-means++'
+    # Check if centroids are provided (manual initialization)
+    if centroids is not None:
+        print(f"Using manually provided centroids: {centroids}")
+        init = np.array(centroids)  # Use the manually provided centroids
     else:
-        init = 'random'
+        # Handle the initialization method based on the provided init_method
+        if init_method == 'random':
+            init = 'random'
+        elif init_method == 'kmeans++':
+            init = 'k-means++'
+        else:
+            init = 'random'
 
     # Run KMeans to full convergence with explicit n_init
-    kmeans = KMeans(n_clusters=n_clusters, init=init, n_init=10)  # Setting n_init=10 to match the current default behavior
+    kmeans = KMeans(n_clusters=n_clusters, init=init, n_init=10 if centroids is None else 1)  # n_init=1 for custom centroids
     kmeans.fit(data)
 
+    # Return the converged cluster centers and labels
     return kmeans.cluster_centers_, kmeans.labels_
 
 

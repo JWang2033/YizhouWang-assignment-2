@@ -143,40 +143,40 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (error) {
         console.error('Error in step through:', error);
     }
-});
+    });
 
 
-  // KMeans run to convergence functionality
   document.getElementById('run_convergence').addEventListener('click', async function() {
-      if (data.length === 0) {
-          console.log('No data generated. Please generate a dataset first.');
-          return;
-      }
+    if (data.length === 0) {
+        console.log('No data generated. Please generate a dataset first.');
+        return;
+    }
 
-      const n_clusters = document.getElementById('n_clusters').value;
-      const init_method = document.getElementById('init_method').value;
+    const n_clusters = document.getElementById('n_clusters').value;
+    const init_method = document.getElementById('init_method').value;
 
-      console.log('Sending request to /run_kmeans');
-      const response = await fetch('/run_kmeans', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-              data: data,
-              n_clusters: n_clusters,
-              init_method: init_method,
-              centroids: init_method === 'manual' ? centroids : null  // Pass manually selected centroids if "manual" is selected
-          })
-      });
+    console.log('Sending request to /run_kmeans');
+    const response = await fetch('/run_kmeans', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            data: data,
+            n_clusters: n_clusters,
+            init_method: init_method,
+            centroids: init_method === 'manual' ? centroids : null  // Pass manually selected centroids if "manual" is selected
+        })
+    });
 
-      const result = await response.json();
-      console.log('Received response from /run_kmeans', result);
-      const centers = result.centers;
-      const labels = result.labels;
-      const colors = generateColors(n_clusters);
+    const result = await response.json();
+    console.log('Received response from /run_kmeans', result);
+    const centers = result.centers;
+    const labels = result.labels;
+    const colors = generateColors(n_clusters);
 
-      drawPoints(data, labels, colors);  // Draw points colored by cluster
-      drawCentroids(centers);  // Draw the centroids
-  });
+    drawPoints(data, labels, colors);  // Draw points colored by cluster
+    drawCentroids(centers);  // Draw the centroids
+    });
+
 
   // Function to generate colors for clusters
 function generateColors(n_clusters) {
