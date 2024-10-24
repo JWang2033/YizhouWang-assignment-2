@@ -1,5 +1,41 @@
 from sklearn.cluster import KMeans
 import numpy as np
+import random
+
+# Random initialization of centroids from the data points
+def random_initialization(data, n_clusters):
+    return data[np.random.choice(data.shape[0], n_clusters, replace=False)]
+
+# Farthest First Initialization Method
+def farthest_first_initialization(data, n_clusters):
+    centroids = []
+    first_centroid = data[random.randint(0, len(data) - 1)]
+    centroids.append(first_centroid)
+
+    # Now choose the remaining centroids
+    for _ in range(1, n_clusters):
+        distances = np.array([min([np.linalg.norm(point - centroid) for centroid in centroids]) for point in data])
+        next_centroid = data[np.argmax(distances)]
+        centroids.append(next_centroid)
+
+    return np.array(centroids)
+
+# KMeans++ Initialization Method
+def kmeans_plus_plus_initialization(data, n_clusters):
+    kmeans = KMeans(n_clusters=n_clusters, init='k-means++', n_init=1, max_iter=1)
+    kmeans.fit(data)
+    return kmeans.cluster_centers_
+
+# Function to initialize centroids based on the selected method
+def initialize_centroids(data, n_clusters, init_method):
+    if init_method == 'random':
+        return random_initialization(data, n_clusters)
+    elif init_method == 'farthest':
+        return farthest_first_initialization(data, n_clusters)
+    elif init_method == 'kmeans++':
+        return kmeans_plus_plus_initialization(data, n_clusters)
+    else:
+        return None  # For manual mode, centroids are selected manually and not initialized
 
 # Function to run one step of KMeans and detect convergence
 def run_kmeans_step(data, n_clusters, init_method, current_iter, prev_centers=None):
@@ -9,6 +45,8 @@ def run_kmeans_step(data, n_clusters, init_method, current_iter, prev_centers=No
             init = 'random'
         elif init_method == 'kmeans++':
             init = 'k-means++'
+        elif init_method == 'farthest':
+            init = farthest_first_initialization(data, n_clusters)  # Custom farthest first initialization
         else:
             init = 'random'
 
@@ -37,7 +75,6 @@ def run_kmeans_step(data, n_clusters, init_method, current_iter, prev_centers=No
     # Return the new centroids, labels, and convergence status
     return kmeans.cluster_centers_, kmeans.labels_, convergence_reached
 
-
 # Function to run KMeans to convergence
 def run_kmeans_convergence(data, n_clusters, init_method, centroids=None):
     if centroids is not None:
@@ -49,6 +86,8 @@ def run_kmeans_convergence(data, n_clusters, init_method, centroids=None):
             init = 'random'
         elif init_method == 'kmeans++':
             init = 'k-means++'
+        elif init_method == 'farthest':
+            init = farthest_first_initialization(data, n_clusters)
         else:
             init = 'random'
 
@@ -57,7 +96,6 @@ def run_kmeans_convergence(data, n_clusters, init_method, centroids=None):
     kmeans.fit(data)
 
     return kmeans.cluster_centers_, kmeans.labels_
-
 
 # Reset function for KMeans (if needed)
 def reset_kmeans():

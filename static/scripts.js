@@ -128,22 +128,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
         drawPoints(data);  // Draw the new dataset points
 
-        // Step 2: Initialize centroids
-        const centroidResponse = await fetch('/initialize_centroids', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                data: data,
-                n_clusters: n_clusters,
-                init_method: init_method
-            })
-        });
+        // Step 2: Initialize centroids only if the method is not manual
+        if (init_method !== 'manual') {
+            const centroidResponse = await fetch('/initialize_centroids', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    data: data,
+                    n_clusters: n_clusters,
+                    init_method: init_method
+                })
+            });
 
-        const centroidResult = await centroidResponse.json();
-        centroids = centroidResult.centers;  // Store initialized centroids
+            const centroidResult = await centroidResponse.json();
+            centroids = centroidResult.centers;  // Store initialized centroids
 
-        // Draw the initialized centroids on the canvas
-        drawCentroids(centroids);
+            // Draw the initialized centroids on the canvas
+            drawCentroids(centroids);
+        }
     });
 
     // KMeans step through functionality
