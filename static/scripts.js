@@ -113,16 +113,37 @@ document.addEventListener('DOMContentLoaded', function() {
         centroids = [];  // Clear previously selected centroids when the method changes
     });
 
-    // Generate new dataset and store it in the 'data' variable
+    // Generate new dataset and initialize centroids
     document.getElementById('generate').addEventListener('click', async function() {
+        const n_clusters = document.getElementById('n_clusters').value;
+        const init_method = document.getElementById('init_method').value;
+
+        // Step 1: Generate a new dataset
         const response = await fetch('/generate_dataset', { method: 'POST' });
         const result = await response.json();
-
         data = result.data;
         isDataGenerated = true;  // Track that data has been generated
         currentIteration = 1;  // Reset the iteration counter
-        currentCenters = null;  // Clear any previous centers
-        drawPoints(data);
+        centroids = [];  // Reset centroids
+
+        drawPoints(data);  // Draw the new dataset points
+
+        // Step 2: Initialize centroids
+        const centroidResponse = await fetch('/initialize_centroids', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                data: data,
+                n_clusters: n_clusters,
+                init_method: init_method
+            })
+        });
+
+        const centroidResult = await centroidResponse.json();
+        centroids = centroidResult.centers;  // Store initialized centroids
+
+        // Draw the initialized centroids on the canvas
+        drawCentroids(centroids);
     });
 
     // KMeans step through functionality
@@ -144,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     n_clusters: n_clusters,
                     init_method: init_method,
                     current_iter: currentIteration,
-                    prev_centers: currentCenters || null  // Send previous centroids if available
+                    prev_centers: currentCenters || centroids  // Send previous centroids if available
                 })
             });
 
@@ -226,4 +247,4 @@ document.addEventListener('DOMContentLoaded', function() {
         currentCenters = null;  // Clear previous centroids
         drawPoints(data);  // Optionally redraw points or clear the canvas
     });
-  });
+});

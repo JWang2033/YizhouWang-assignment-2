@@ -8,6 +8,19 @@ app = Flask(__name__)
 def index():
     return render_template('index.html')
 
+@app.route('/initialize_centroids', methods=['POST'])
+def initialize_centroids():
+    try:
+        data = np.array(request.json['data'])
+        n_clusters = int(request.json['n_clusters'])
+        init_method = request.json['init_method']
+
+        # Call a KMeans initialization function based on the chosen method
+        centers = run_kmeans_step(data, n_clusters, init_method, 1)[0]  # First step initializes centroids
+        return jsonify(centers=centers.tolist())
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route('/generate_dataset', methods=['POST'])
 def generate_dataset():
     n_points = 100  # Example dataset size
